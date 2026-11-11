@@ -37,12 +37,13 @@ Expected order:
 
 **Responsibilities:**
 - Impute genuinely missing Age values using the median of valid, numeric ages.
-- Do not impute invalid text values such as `twenty`; those must already have been rejected by validation.
+- Impute genuinely missing Salary values using the median of valid, non-negative numeric salaries.
+- Do not impute invalid text values such as `twenty` or `abc`; those must already have been rejected by validation.
 - Work on a copy rather than modifying the caller's DataFrame in place.
 
 **Returns:** A two-item tuple:
-1. `imputed_df`: the DataFrame with eligible missing Age values imputed.
-2. `imputation_stats`: a dictionary containing at least `ages_imputed` and the median used (if one was available).
+1. `imputed_df`: the DataFrame with eligible missing Age and Salary values imputed.
+2. `imputation_stats`: a dictionary containing at least `ages_imputed`, `salaries_imputed`, and the medians used (if available).
 
 ## 3. Member 2 — `src/validation.py`
 
@@ -54,12 +55,13 @@ Expected order:
 - Separate valid records from rejected records.
 - Reject non-numeric Age values such as `twenty`.
 - Reject Age values below 0 or above 120.
+- Reject non-numeric Salary values such as `abc`.
 - Reject negative Salary values.
 - Preserve rejected rows and add a `rejection_reason` field explaining why each row was rejected.
-- Distinguish an originally missing Age from a non-empty value that fails numeric conversion. Do not treat both as ordinary missing values.
+- Distinguish originally missing numeric values from non-empty values that fail numeric conversion. Do not treat both as ordinary missing values.
 
 **Returns:** A three-item tuple:
-1. `valid_df`: records that pass validation; genuinely missing Age values may remain missing for the imputation stage.
+1. `valid_df`: records that pass validation; genuinely missing Age and Salary values may remain missing for the imputation stage.
 2. `rejected_df`: rejected records, including their `rejection_reason`.
 3. `validation_stats`: a dictionary containing at least `valid_rows` and `rejected_rows`, plus useful rejection counts.
 
@@ -71,7 +73,7 @@ Expected order:
 
 **Responsibilities:**
 - Combine the stage statistics into one clear report structure.
-- Include input, duplicate, valid, rejected, and imputed-row counts.
+- Include input, duplicate, valid, rejected, Age-imputed, and Salary-imputed counts.
 - Keep the report data consistent with the actual output DataFrames.
 
 **Returns:** A dictionary representing the report. The pipeline is responsible for saving it under `reports/` unless the team agrees on a separate save function.
@@ -101,7 +103,3 @@ The pipeline should return or save the cleaned DataFrame, rejected DataFrame, an
 - Do not silently change a function's return shape. Discuss and update this document before changing a contract.
 - Add or update unit tests when changing a function.
 - Run the tests before opening a Pull Request.
-
-## 7. Open policy question
-
-The current data policy defines how to handle negative Salary values but does not yet define what to do when Salary is genuinely missing or contains non-numeric text. Agree on that rule before implementing Salary validation.
