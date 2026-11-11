@@ -29,9 +29,13 @@ This document defines the data-quality rules for the Automated CSV Cleaner proje
 - For records that pass validation, replace genuinely missing ages with the median of valid ages.
 - Never impute a conversion failure such as `twenty`. It must remain a rejected record.
 
-## 5. Salary validation
+## 5. Salary validation and missing values
 
-- Reject records with a negative salary.
+- A genuinely empty Salary is missing data, not automatically invalid data.
+- For records that pass validation, replace genuinely missing Salary values with the median of valid, non-negative numeric salaries.
+- Reject non-empty Salary values that cannot be converted to a number (for example, `abc`).
+- Reject negative Salary values.
+- Never impute a conversion failure such as `abc`; it must remain a rejected record.
 - Do not silently change a negative salary to zero or another value.
 
 ## 6. Rejected records
@@ -45,17 +49,17 @@ This document defines the data-quality rules for the Automated CSV Cleaner proje
 - Save accepted, cleaned data separately under `data/cleaned/`.
 - Save rejected records under `data/rejected/`.
 - Save a processing report under `reports/`.
-- Report useful counts, including input rows, duplicates removed, accepted rows, rejected rows, and imputed values.
+- Report useful counts, including input rows, duplicates removed, accepted rows, rejected rows, and imputed values for Age and Salary.
 - Ensure the reported counts are consistent with the actual output files.
 
 ## 8. Expected processing order
 
 1. Read the raw CSV.
 2. Standardize text values.
-3. Identify and track numeric conversion failures separately from genuinely missing values.
+3. Identify and track numeric conversion failures separately from genuinely missing values for both Age and Salary.
 4. Remove duplicate rows after text standardization.
 5. Validate records and separate rejected records from valid records.
-6. Impute genuinely missing ages in the valid records using the median of valid ages.
+6. Impute genuinely missing Age and Salary values in valid records using the respective medians of valid numeric values.
 7. Save accepted and rejected outputs.
 8. Generate the processing report.
 
@@ -64,8 +68,8 @@ This document defines the data-quality rules for the Automated CSV Cleaner proje
 Tests should cover at least:
 - Leading/trailing whitespace and inconsistent capitalization.
 - Duplicate rows that become identical after standardization.
-- A genuinely missing age.
-- A non-numeric age such as `twenty`.
+- Genuinely missing Age and Salary values.
+- Non-numeric Age and Salary values such as `twenty` and `abc`.
 - An age below 0 and an age above 120.
 - A negative salary.
 - Correct accepted/rejected outputs and report statistics.
